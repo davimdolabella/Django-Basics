@@ -32,6 +32,15 @@ class RecipeViewsTest(RecipeTestBase):
         response_context_recipes = response.context['recipes']
         self.assertIn('Recipe title', content)
 
+    def test_recipe_home_template_dont_loads_recipes_not_published(self):
+        self.make_recipe(is_published=False)
+        response = self.client.get(reverse('recipes:home'))
+        content = response.content.decode('utf-8')
+        self.assertIn(
+            '<h1 class="center all"> No Recipes found here 😥</h1>',
+            response.content.decode('utf-8')
+        )
+
     def test_recipe_category_views_function_is_correct(self):
         view = resolve(
             reverse('recipes:category', kwargs={'category_id': 1})
@@ -44,6 +53,19 @@ class RecipeViewsTest(RecipeTestBase):
         )
         self.assertEqual(response.status_code, 404)
 
+    def test_recipe_category_template_loads_recipes(self):
+        title = 'This is a category test'
+        self.make_recipe(title=title)
+        response = self.client.get(reverse('recipes:category', args=(1,)))
+        content = response.content.decode('utf-8')
+        self.assertIn(title, content)
+
+    def test_recipe_category_template_dont_loads_recipes_not_published(self):
+        recipe= self.make_recipe(is_published=False)
+        response = self.client.get(reverse('recipes:category', args=(recipe.category.id,)))
+        self.assertEqual(response.status_code, 404)
+
+
     def test_recipe_detail_views_function_is_correct(self):
         view = resolve(
             reverse('recipes:recipe', kwargs={'id': 1})
@@ -54,4 +76,18 @@ class RecipeViewsTest(RecipeTestBase):
         response = self.client.get(
              reverse('recipes:recipe', kwargs={'id': 10000})
         )
+        self.assertEqual(response.status_code, 404)
+
+
+    def test_recipe_detail_template_loads_the_correct_recipe(self):
+        title = 'This is a detail test'
+        self.make_recipe(title=title)
+        response = self.client.get(reverse('recipes:recipe', args=(1,)))
+        content = response.content.decode('utf-8')
+        self.assertIn(title, content)
+
+
+    def test_recipe_detail_template_dont_load_recipe_not_published(self):
+        recipe= self.make_recipe(is_published=False)
+        response = self.client.get(reverse('recipes:recipe', args=(recipe.id,)))
         self.assertEqual(response.status_code, 404)
