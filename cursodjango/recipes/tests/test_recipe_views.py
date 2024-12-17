@@ -91,3 +91,12 @@ class RecipeViewsTest(RecipeTestBase):
         recipe= self.make_recipe(is_published=False)
         response = self.client.get(reverse('recipes:recipe', args=(recipe.id,)))
         self.assertEqual(response.status_code, 404)
+    
+    def test_recipr_search_uses_currect_view_function(self):
+        resolved = resolve(reverse('recipes:search'))
+        self.assertIs(resolved.func, views.search)
+    
+    def test_recipe_search_loads_correct_template(self):
+        response = self.client.get(reverse('recipes:search'))
+        self.assertTemplateUsed(response, 'recipes/pages/search.html')
+
