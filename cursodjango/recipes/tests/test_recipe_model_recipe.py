@@ -11,21 +11,21 @@ class RecipeModelTest(RecipeTestBase):
         return super().setUp()
 
     def make_recipe_no_default(self):
-            recipe = Recipe(
-                category=self.make_category(name='newCategory'),
-                author=self.make_author(username='newUser'),
-                title ='Recipe title',
-                description ='Recipe description',
-                slug ='recipe-slug',
-                preparation_time =10,
-                preparation_time_unit ='Minutos',
-                servings =5,
-                servings_unit ='Porções',
-                preparation_steps ='Preparation Steps',
-            )
-            recipe.full_clean()
-            recipe.save()
-            return recipe
+        recipe = Recipe(
+            category=self.make_category(name='newCategory'),
+            author=self.make_author(username='newUser'),
+            title ='Recipe title',
+            description ='Recipe description',
+            slug ='new_recipe-slug',
+            preparation_time =10,
+            preparation_time_unit ='Minutos',
+            servings =5,
+            servings_unit ='Porções',
+            preparation_steps ='Preparation Steps',
+        )
+        recipe.full_clean()
+        recipe.save()
+        return recipe
 
     @parameterized.expand([
         ('title',65),
