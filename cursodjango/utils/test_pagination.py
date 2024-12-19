@@ -1,5 +1,8 @@
-from unittest import TestCase
-from utils.pagination import make_pagination_range
+import pytest
+from django.test import TestCase
+from django.urls import reverse
+from utils.pagination import make_pagination_range, make_pagination
+from recipes.models import Category, Recipe, User
 
 
 class PaginationTest(TestCase):
@@ -48,3 +51,37 @@ class PaginationTest(TestCase):
             current_page=19,
         )['pagination']
         self.assertEqual([17,18,19,20], pagination)
+
+    def test_current_page_is_1_if_ValueError(self):
+        category = Category.objects.create(name='Café da Manhã')
+        user = User.objects.create_user(
+            first_name='Lara',
+            last_name='Crosfit',
+            email='laracrosfit@gmail.com',
+            username='laracrosfit123',
+            password='lara123'
+        )
+        for i in range (1, 101):
+            Recipe.objects.create(
+                category=category,
+                author=user,
+                title =f'Uma Recita({i})',
+                description ='Recipe description',
+                slug =f'recipe-slug({i})',
+                preparation_time =10,
+                preparation_time_unit ='Minutos',
+                servings =5,
+                servings_unit ='Porções',
+                preparation_steps ='Preparation Steps',
+                preparation_steps_is_html =False,
+                is_published =True,
+                cover='123',
+        )
+        recipes = Recipe.objects.all().order_by('-id')
+        response = self.client.get(reverse('recipes:home') + '?page=abc')
+        request = response.context['request']
+        obj_pages, pagination_range = make_pagination(request, recipes, 9)
+        self.assertEqual(pagination_range['current_page'], 1)
+        
+        
+
